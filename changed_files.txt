@@ -1,0 +1,13 @@
+modified:   
+_inc/MoveSonicInDemo.asm
+modified:   _inc/PauseGame.asm
+modified:   _incObj/0D Signpost.asm
+modified:   _incObj/2E Monitor Content Power-Up.asm
+modified:   _incObj/Sonic Display.asm
+modified:   _incObj/sub PlaySound.asm
+modified:   s1.sounddriver.asm
+modified:   sonic.asm
+
+added:
+msuLockout.bin
+sound/msu-drv.bin
