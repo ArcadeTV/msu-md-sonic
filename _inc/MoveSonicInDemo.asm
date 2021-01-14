@@ -38,6 +38,7 @@ MDemo_On:
 		bpl.s	@dontquit	; if not, branch
 		tst.w	(f_demo).w	; is this an ending sequence demo?
 		bmi.s	@dontquit	; if yes, branch
+        jsr     msuStop
 		move.b	#id_Title,(v_gamemode).w ; go to title screen
 
 	@dontquit:

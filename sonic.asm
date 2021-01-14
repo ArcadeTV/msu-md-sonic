@@ -24,6 +24,20 @@ ZoneCount:	equ 6	; discrete zones are: GHZ, MZ, SYZ, LZ, SLZ, and SBZ
 
 OptimiseSound:	equ 0	; change to 1 to optimise sound queuing
 
+; MSU-MD vars
+HW_version		EQU	$A10001					; hardware version in low nibble
+											; bit 6 is PAL (50Hz) if set, NTSC (60Hz) if clear
+											; region flags in bits 7 and 6:
+											;         USA NTSC = $80
+											;         Asia PAL = $C0
+											;         Japan NTSC = $00
+											;         Europe PAL = $C0
+MCD_STAT:       equ $A12020                 ; 0-ready, 1-init, 2-cmd busy
+MCD_CMD:        equ $A12010 
+MCD_ARG:        equ $A12011
+MCD_CMD_CK:     equ $A1201F
+v_LAST_MSU      equ $FFF60E
+
 ; ===========================================================================
 
 StartOfRom:
@@ -106,7 +120,7 @@ loc_E0:
 		dc.l ErrorTrap
 		dc.l ErrorTrap
 	endif
-Console:	dc.b "SEGA MEGA DRIVE " ; Hardware system ID (Console name)
+Console:	dc.b "SEGA MEGASD     " ; Hardware system ID (Console name)
 Date:		dc.b "(C)SEGA 1991.APR" ; Copyright holder and release date (generally year)
 Title_Local:	dc.b "SONIC THE               HEDGEHOG                " ; Domestic name
 Title_Int:	dc.b "SONIC THE               HEDGEHOG                " ; International name
@@ -142,10 +156,25 @@ ErrorTrap:
 ; ===========================================================================
 
 EntryPoint:
-		tst.l	(z80_port_1_control).l ; test port A & B control registers
+		tst.l	(z80_port_1_control).l      ; test port A & B control registers
 		bne.s	PortA_Ok
-		tst.w	(z80_expansion_control).l ; test port C control register
+		tst.w	(z80_expansion_control).l   ; test port C control register
 
+        btst	#$6,(HW_version).l          ; Check for PAL or NTSC, 0=60Hz, 1=50Hz
+		bne.s	jmpLockout		            ; if !=0, branch to lockout
+        
+        jsr     MSUMD_DRV
+        tst.b 	d0							; if 0: no CD Hardware found
+		bne.s	jmpLockout				    ; if no, branch to lockout
+		;beq.s	jmpLockout				    ; if no, branch to lockout <- Fix for being able to play on GENS
+		move.w 	#($1500|255),MCD_CMD		; Set CD Volume to MAX
+		addq.b 	#1,MCD_CMD_CK 				; Increment command clock
+        
+        bra.s   PortA_Ok                    ; skip jmpLockout
+        
+jmpLockout:
+        jmp     msuLockout
+        
 PortA_Ok:
 		bne.s	SkipSetup ; Skip the VDP and Z80 setup code if port A, B or C is ok...?
 		lea	SetupValues(pc),a5	; Load setup values array address.
@@ -2005,6 +2034,7 @@ WaitForVBla:
 
 GM_Sega:
 		sfx	bgm_Stop,0,1,1 ; stop music
+        jsr msuStop
 		bsr.w	ClearPLC
 		bsr.w	PaletteFadeOut
 		lea	(vdp_control_port).l,a6
@@ -2049,23 +2079,26 @@ GM_Sega:
 		move.w	d0,(vdp_control_port).l
 
 Sega_WaitPal:
+        jsr     msuPlayTrack_20
 		move.b	#2,(v_vbla_routine).w
 		bsr.w	WaitForVBla
 		bsr.w	PalCycle_Sega
 		bne.s	Sega_WaitPal
 
-		sfx	sfx_Sega,0,1,1	; play "SEGA" sound
+		;sfx	sfx_Sega,0,1,1	; play "SEGA" sound
+        
+        
 		move.b	#$14,(v_vbla_routine).w
 		bsr.w	WaitForVBla
-		move.w	#$1E,(v_demolength).w
+		move.w	#$8E,(v_demolength).w
 
 Sega_WaitEnd:
 		move.b	#2,(v_vbla_routine).w
 		bsr.w	WaitForVBla
 		tst.w	(v_demolength).w
 		beq.s	Sega_GotoTitle
-		andi.b	#btnStart,(v_jpadpress1).w ; is Start button pressed?
-		beq.s	Sega_WaitEnd	; if not, branch
+		;andi.b	#btnStart,(v_jpadpress1).w ; is Start button pressed?
+		bra.s	Sega_WaitEnd	; if not, branch
 
 Sega_GotoTitle:
 		move.b	#id_Title,(v_gamemode).w ; go to title screen
@@ -2078,6 +2111,7 @@ Sega_GotoTitle:
 
 GM_Title:
 		sfx	bgm_Stop,0,1,1 ; stop music
+        ;jsr msuStop
 		bsr.w	ClearPLC
 		bsr.w	PaletteFadeOut
 		disable_ints
@@ -2184,9 +2218,10 @@ GM_Title:
 		bsr.w	NemDec
 		moveq	#palid_Title,d0	; load title screen palette
 		bsr.w	PalLoad1
-		sfx	bgm_Title,0,1,1	; play title screen music
+		;sfx	bgm_Title,0,1,1	; play title screen music
+        jsr     msuPlayTrack_10
 		move.b	#0,(f_debugmode).w ; disable debug mode
-		move.w	#$178,(v_demolength).w ; run title screen for $178 frames
+		move.w	#$258,(v_demolength).w ; run title screen for $178 frames
 		lea	(v_objspace+$80).w,a1
 		moveq	#0,d0
 		move.w	#7,d1
@@ -2357,7 +2392,7 @@ LevSel_NoCheat:
 		blo.s	LevelSelect	; if yes, branch
 
 LevSel_PlaySnd:
-		bsr.w	PlaySound_Special
+		bsr.w	PlaySound_Test
 		bra.s	LevelSelect
 ; ===========================================================================
 
@@ -3071,6 +3106,7 @@ Level_EndDemo:
 		move.b	#id_Credits,(v_gamemode).w ; go to credits
 
 Level_FadeDemo:
+        jsr     msuStop
 		move.w	#$3C,(v_demolength).w
 		move.w	#$3F,(v_pfade_start).w
 		clr.w	(v_palchgspeed).w
@@ -3283,8 +3319,11 @@ GM_Special:
 		bsr.w	PalCycle_SS
 		clr.w	(v_ssangle).w	; set stage angle to "upright"
 		move.w	#$40,(v_ssrotate).w ; set stage rotation speed
-		music	bgm_SS,0,1,0	; play special stage BG	music
-		move.w	#0,(v_btnpushtime1).w
+		
+        ;music	bgm_SS,0,1,0	; play special stage BG	music
+        jsr     msuPlayTrack_09
+		
+        move.w	#0,(v_btnpushtime1).w
 		lea	(DemoDataPtr).l,a1
 		moveq	#6,d0
 		lsl.w	#2,d0
@@ -3386,8 +3425,10 @@ loc_47D4:
 		move.w	(v_rings).w,d0
 		mulu.w	#10,d0		; multiply rings by 10
 		move.w	d0,(v_ringbonus).w ; set rings bonus
-		sfx	bgm_GotThrough,0,0,0	 ; play end-of-level music
-
+        
+		;sfx	bgm_GotThrough,0,0,0	 ; play end-of-level music
+        jsr     msuPlayTrack_14
+        
 		lea	(v_objspace).w,a1
 		moveq	#0,d0
 		move.w	#$7FF,d1
@@ -3817,6 +3858,7 @@ Map_ContScr:	include	"_maps\Continue Screen.asm"
 
 GM_Ending:
 		sfx	bgm_Stop,0,1,1 ; stop music
+        jsr msuStop
 		bsr.w	PaletteFadeOut
 
 		lea	(v_objspace).w,a1
@@ -9283,7 +9325,12 @@ SoundDriver:	include "s1.sounddriver.asm"
 
 ; end of 'ROM'
 		even
+
+MSUMD_DRV:      incbin  "sound\msu-drv.bin"
+        even
+        
+msuLockout:     incbin "msuLockout.bin"
+        even
+        
 EndOfRom:
-
-
 		END

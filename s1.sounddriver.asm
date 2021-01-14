@@ -736,7 +736,8 @@ Sound_PlayBGM:
 @backupramloop:
 		move.l	(a0)+,(a1)+
 		dbf	d0,@backupramloop
-
+        
+        jsr     msuStop
 		move.b	#$80,f_1up_playing(a6)
 		clr.b	v_sndprio(a6)		; Clear priority again (?)
 		bra.s	@bgm_loadMusic
@@ -2070,6 +2071,7 @@ cfFadeInToPrevious:
 		movea.l	a3,a5
 		move.b	#$80,f_fadein_flag(a6)		; Trigger fade-in
 		move.b	#$28,v_fadein_counter(a6)	; Fade-in delay
+        jsr     msuResume
 		clr.b	f_1up_playing(a6)
 		startZ80
 		addq.w	#8,sp		; Tamper return value so we don't return to caller

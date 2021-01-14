@@ -17,6 +17,7 @@ PauseGame:
 Pause_StopGame:
 		move.w	#1,(f_pause).w	; freeze time
 		move.b	#1,(v_snddriver_ram+f_pausemusic).w ; pause music
+        jsr msuStop
 
 Pause_Loop:
 		move.b	#$10,(v_vbla_routine).w
@@ -42,6 +43,7 @@ Pause_ChkStart:
 
 Pause_EndMusic:
 		move.b	#$80,(v_snddriver_ram+f_pausemusic).w	; unpause the music
+        jsr msuResume
 
 Unpause:
 		move.w	#0,(f_pause).w	; unpause the game
