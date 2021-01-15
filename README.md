@@ -23,7 +23,7 @@ Compatibility  Works on real hardware with
                (*untested on my end)
 
 SourceROMs:    Sonic The Hedgehog (USA, Europe).md (CRC: F9394E97)
-Patched ROM:   V1.0 -> CRC: A852D64F
+Patched ROM:   V1.2 -> CRC: 667e9cc2
 
 Date:          2021-01-14
 
