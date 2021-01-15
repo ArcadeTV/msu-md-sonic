@@ -2,6 +2,8 @@
 
 Genesis/MegaDrive: MSU-MD CD quality audio patch for SONIC the Hedgehog
 
+For help topics please see this [wiki](https://github.com/ArcadeTV/msu-md_castleOfIllusion/wiki)
+
 ```
  _____               _     _____ _____ 
 |  _  |___ ___ ___ _| |___|_   _|  |  |
