@@ -94,6 +94,9 @@ PlaySound_Special:
 ; ===========================================================================
 
 msuPlayTrack_01:                        ; Green Hill Zone
+    tst.b	(v_shoes).w	                ; does Sonic have speed	shoes?
+	bne.w	msuPlayTrack_21	            ; if yes, branch to play fast track
+
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_01 
         
@@ -103,6 +106,9 @@ msuPlayTrack_01:                        ; Green Hill Zone
     rts
     
 msuPlayTrack_02:                        ; Labyrinth Zone
+    tst.b	(v_shoes).w	                ; does Sonic have speed	shoes?
+	bne.w	msuPlayTrack_22	            ; if yes, branch to play fast track
+
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_02 
         
@@ -112,6 +118,9 @@ msuPlayTrack_02:                        ; Labyrinth Zone
     rts
     
 msuPlayTrack_03:                        ; Marble Zone
+    tst.b	(v_shoes).w	                ; does Sonic have speed	shoes?
+	bne.w	msuPlayTrack_23	            ; if yes, branch to play fast track
+
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_03 
         
@@ -121,6 +130,9 @@ msuPlayTrack_03:                        ; Marble Zone
     rts
     
 msuPlayTrack_04:                        ; Star Light Zone
+    tst.b	(v_shoes).w	                ; does Sonic have speed	shoes?
+	bne.w	msuPlayTrack_24	            ; if yes, branch to play fast track
+
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_04 
         
@@ -130,6 +142,9 @@ msuPlayTrack_04:                        ; Star Light Zone
     rts
     
 msuPlayTrack_05:                        ; Spring Yard Zone
+    tst.b	(v_shoes).w	                ; does Sonic have speed	shoes?
+	bne.w	msuPlayTrack_25	            ; if yes, branch to play fast track
+
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_05 
         
@@ -139,6 +154,9 @@ msuPlayTrack_05:                        ; Spring Yard Zone
     rts
     
 msuPlayTrack_06:                        ; Scrap Brain Zone
+    tst.b	(v_shoes).w	                ; does Sonic have speed	shoes?
+	bne.w	msuPlayTrack_26	            ; if yes, branch to play fast track
+
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_06 
         
@@ -148,8 +166,7 @@ msuPlayTrack_06:                        ; Scrap Brain Zone
     rts
     
 msuPlayTrack_07:                        ; Invincibility
-    lea	    (v_snddriver_ram&$FFFFFF).l,a6
-    tst.b	f_speedup(a6)               ; shoes on?
+    tst.b	(v_shoes).w	                ; does Sonic have speed	shoes?
 	bne.w	msuPlayTrack_27	            ; if yes, branch to play fast track
         
     tst.b   MCD_STAT
@@ -157,7 +174,7 @@ msuPlayTrack_07:                        ; Invincibility
         
     move.w  #($1100|7),MCD_CMD          ; send cmd: play track #7, no loop
     addq.b  #1,MCD_CMD_CK               ; Increment command clock
-    move.b  #$87,(v_LAST_MSU)
+    ;move.b  #$87,(v_LAST_MSU)
     rts
     
 msuPlayTrack_08:                        ; Extra Life
@@ -267,59 +284,61 @@ msuPlayTrack_20:                        ; SEEEGAAAAA
     
 ; ----- Fast Tracks :
 
-msuPlayTrack_21:                        ; Green Hill Zone
+msuPlayTrack_21:                        ; FAST Green Hill Zone
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_21 
         
-    move.w  #($1200|21),MCD_CMD          ; send cmd: play track #1, loop
+    move.w  #($1200|21),MCD_CMD         ; send cmd: play track #1, loop
     addq.b  #1,MCD_CMD_CK               ; Increment command clock
     rts
     
-msuPlayTrack_22:                        ; Labyrinth Zone
+msuPlayTrack_22:                        ; FAST Labyrinth Zone
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_22 
         
-    move.w  #($1200|22),MCD_CMD          ; send cmd: play track #2, loop
+    move.w  #($1200|22),MCD_CMD         ; send cmd: play track #2, loop
     addq.b  #1,MCD_CMD_CK               ; Increment command clock
     rts
     
-msuPlayTrack_23:                        ; Marble Zone
+msuPlayTrack_23:                        ; FAST Marble Zone
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_23 
         
-    move.w  #($1200|23),MCD_CMD          ; send cmd: play track #3, loop
+    move.w  #($1200|23),MCD_CMD         ; send cmd: play track #3, loop
     addq.b  #1,MCD_CMD_CK               ; Increment command clock
     rts
     
-msuPlayTrack_24:                        ; Star Light Zone
+msuPlayTrack_24:                        ; FAST Star Light Zone
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_24 
         
-    move.w  #($1200|24),MCD_CMD          ; send cmd: play track #4, loop
+    move.w  #($1200|24),MCD_CMD         ; send cmd: play track #4, loop
     addq.b  #1,MCD_CMD_CK               ; Increment command clock
     rts
     
-msuPlayTrack_25:                        ; Spring Yard Zone
+msuPlayTrack_25:                        ; FAST Spring Yard Zone
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_25 
         
-    move.w  #($1200|25),MCD_CMD          ; send cmd: play track #5, loop
+    move.w  #($1200|25),MCD_CMD         ; send cmd: play track #5, loop
     addq.b  #1,MCD_CMD_CK               ; Increment command clock
     rts
     
-msuPlayTrack_26:                        ; Scrap Brain Zone
+msuPlayTrack_26:                        ; FAST Scrap Brain Zone
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_26 
         
-    move.w  #($1200|26),MCD_CMD          ; send cmd: play track #6, loop
+    move.w  #($1200|26),MCD_CMD         ; send cmd: play track #6, loop
     addq.b  #1,MCD_CMD_CK               ; Increment command clock
     rts
     
-msuPlayTrack_27:                        ; Invincibility
+msuPlayTrack_27:                        ; FAST Invincibility
     tst.b   MCD_STAT
     bne.s   msuPlayTrack_27 
-        
-    move.w  #($1100|27),MCD_CMD          ; send cmd: play track #7, no loop
+
+    ;move.b  #$87,(v_LAST_MSU)
+
+    move.w  #($1100|27),MCD_CMD         ; send cmd: play track #7, no loop
     addq.b  #1,MCD_CMD_CK               ; Increment command clock
     rts
     
@@ -339,12 +358,15 @@ msuResume:
     addq.b  #1,MCD_CMD_CK               ; Increment command clock
     rts
     
-msuChangeTrackSpeed:
+msuChangeTrackSpeed:                    ; Sonic got shoes
     move.b  (v_LAST_MSU),d0
     jsr     findAndPlayFastTrack
     rts
     
-msuRestoreTrackSpeed:
+msuRestoreTrackSpeed:                   ; Sonic lost his shoes
+    tst.b   (v_invinc).w                ; is Sonic invincible?
+    bne.w   msuPlayTrack_07             ; if yes, play invincible music
+
     move.b  (v_LAST_MSU),d0
     jsr     findAndPlayTrack
     rts

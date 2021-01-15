@@ -122,8 +122,8 @@ loc_E0:
 	endif
 Console:	dc.b "SEGA MEGASD     " ; Hardware system ID (Console name)
 Date:		dc.b "(C)SEGA 1991.APR" ; Copyright holder and release date (generally year)
-Title_Local:	dc.b "SONIC THE               HEDGEHOG                " ; Domestic name
-Title_Int:	dc.b "SONIC THE               HEDGEHOG                " ; International name
+Title_Local:	dc.b "SONIC THE HEDGEHOG MSU-MD v1.2 ArcadeTV         " ; Domestic name
+Title_Int:	    dc.b "SONIC THE HEDGEHOG MSU-MD v1.2 ArcadeTV         " ; International name
 Serial:		if Revision=0
 		dc.b "GM 00001009-00"   ; Serial/version number (Rev 0)
 		else
@@ -156,25 +156,24 @@ ErrorTrap:
 ; ===========================================================================
 
 EntryPoint:
-		tst.l	(z80_port_1_control).l      ; test port A & B control registers
-		bne.s	PortA_Ok
-		tst.w	(z80_expansion_control).l   ; test port C control register
-
-        btst	#$6,(HW_version).l          ; Check for PAL or NTSC, 0=60Hz, 1=50Hz
+		btst	#$6,(HW_version).l          ; Check for PAL or NTSC, 0=60Hz, 1=50Hz
 		bne.s	jmpLockout		            ; if !=0, branch to lockout
-        
-        jsr     MSUMD_DRV
-        tst.b 	d0							; if 0: no CD Hardware found
-		bne.s	jmpLockout				    ; if no, branch to lockout
-		;beq.s	jmpLockout				    ; if no, branch to lockout <- Fix for being able to play on GENS
+		
+		jsr     MSUMD_DRV
+		;tst.b 	d0							; if 0: no CD Hardware found
+		;bne.s	jmpLockout				    ; if no, branch to lockout
 		move.w 	#($1500|255),MCD_CMD		; Set CD Volume to MAX
 		addq.b 	#1,MCD_CMD_CK 				; Increment command clock
-        
-        bra.s   PortA_Ok                    ; skip jmpLockout
+		
+		bra.s   msuOK                       ; skip jmpLockout
         
 jmpLockout:
         jmp     msuLockout
-        
+
+msuOK:
+		tst.l	(z80_port_1_control).l      ; test port A & B control registers
+		bne.s	PortA_Ok
+		tst.w	(z80_expansion_control).l   ; test port C control register
 PortA_Ok:
 		bne.s	SkipSetup ; Skip the VDP and Z80 setup code if port A, B or C is ok...?
 		lea	SetupValues(pc),a5	; Load setup values array address.
