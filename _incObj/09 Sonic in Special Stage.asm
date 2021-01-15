@@ -492,7 +492,7 @@ Obj09_Chk1Up:
 Obj09_Get1Up:
 		addq.b	#1,(v_lives).w	; add 1 to number of lives
 		addq.b	#1,(f_lifecount).w ; update the lives counter
-		music	bgm_ExtraLife,0,0,0	; play extra life music
+		sfx	bgm_ExtraLife,0,0,0	; play extra life music
 		moveq	#0,d4
 		rts	
 ; ===========================================================================

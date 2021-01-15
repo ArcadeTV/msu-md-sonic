@@ -30,8 +30,8 @@ findAndPlayTrack:
         beq     msuPlayTrack_06
         cmp.b   #$87,d0                 ; Invincibility
         beq     msuPlayTrack_07
-        cmp.b   #$88,d0                 ; Extra Life
-        beq     msuPlayTrack_08
+        ;cmp.b   #$88,d0                 ; Extra Life
+        ;beq     msuPlayTrack_08
         cmp.b   #$89,d0                 ; Special Stage
         beq     msuPlayTrack_09
         cmp.b   #$8A,d0                 ; Title Screen
@@ -148,7 +148,8 @@ msuPlayTrack_06:                        ; Scrap Brain Zone
     rts
     
 msuPlayTrack_07:                        ; Invincibility
-    tst.b	(f_speedup).w               ; shoes on?
+    lea	    (v_snddriver_ram&$FFFFFF).l,a6
+    tst.b	f_speedup(a6)               ; shoes on?
 	bne.w	msuPlayTrack_27	            ; if yes, branch to play fast track
         
     tst.b   MCD_STAT
