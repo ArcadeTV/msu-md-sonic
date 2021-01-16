@@ -160,8 +160,8 @@ EntryPoint:
 		bne.s	jmpLockout		            ; if !=0, branch to lockout
 		
 		jsr     MSUMD_DRV
-		;tst.b 	d0							; if 0: no CD Hardware found
-		;bne.s	jmpLockout				    ; if no, branch to lockout
+		tst.b 	d0							; if 1: no CD Hardware found
+		bne.s	jmpLockout				    ; if no, branch to lockout
 		move.w 	#($1500|255),MCD_CMD		; Set CD Volume to MAX
 		addq.b 	#1,MCD_CMD_CK 				; Increment command clock
 		
