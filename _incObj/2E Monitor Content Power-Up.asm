@@ -79,7 +79,7 @@ Pow_ChkShield:
 
 		move.b	#1,(v_shield).w	; give Sonic a shield
 		move.b	#id_ShieldItem,(v_objspace+$180).w ; load shield object ($38)
-		music	sfx_Shield,1,0,0	; play shield sound
+		sfx 	sfx_Shield,1,0,0	; play shield sound
 ; ===========================================================================
 
 Pow_ChkInvinc:
@@ -126,7 +126,7 @@ Pow_ChkRings:
 		beq.w	ExtraLife
 
 	Pow_RingSound:
-		music	sfx_Ring,1,0,0	; play ring sound
+		sfx 	sfx_Ring,1,0,0	; play ring sound
 ; ===========================================================================
 
 Pow_ChkS:
